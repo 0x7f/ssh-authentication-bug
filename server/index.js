@@ -7,7 +7,7 @@ const { privateKey } = crypto.generateKeyPairSync("rsa", {
   privateKeyEncoding: { type: "pkcs1", format: "pem" },
 });
 
-new ssh2.Server({ hostKeys: [privateKey] }, (client) => {
+new ssh2.Server({ hostKeys: [privateKey], debug: console.log }, (client) => {
   console.log("SSH Client connected");
 
   client.on("authentication", (ctx) => {
