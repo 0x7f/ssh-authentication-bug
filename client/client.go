@@ -1,9 +1,9 @@
 package main
 
 import (
+	"crypto"
+	"crypto/ed25519"
 	"crypto/rand"
-	"crypto/rsa"
-	"crypto/x509"
 	"encoding/pem"
 	"log"
 
@@ -11,20 +11,17 @@ import (
 )
 
 func generatePublicKeyAuthMethod() (ssh.AuthMethod, error) {
-	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	var _, privKey, err = ed25519.GenerateKey(rand.Reader)
 	if err != nil {
 		return nil, err
 	}
 
-	privDER := x509.MarshalPKCS1PrivateKey(privateKey)
-
-	privBlock := pem.Block{
-		Type:    "RSA PRIVATE KEY",
-		Headers: nil,
-		Bytes:   privDER,
+	privBlock, err := ssh.MarshalPrivateKey(crypto.PrivateKey(privKey), "")
+	if err != nil {
+		return nil, err
 	}
 
-	privatePEM := pem.EncodeToMemory(&privBlock)
+	privatePEM := pem.EncodeToMemory(privBlock)
 
 	signer, err := ssh.ParsePrivateKey(privatePEM)
 	if err != nil {
